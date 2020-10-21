@@ -107,14 +107,14 @@ class Node
 
     # insert a new node into the leaf
     def insert(key, node = tree)
-      if node.data == key
-        return node
-      else
-        if child_count(node) == 0
-          key < node.data ? node.left = Node.new(key) : node.right = Node.new(key)
-        else
-          insert(key, node.data > key ? node.left : node.right)
-        end
+      return node if node.data == key
+      case child_count(node)
+      when 0
+        key < node.data ? node.left = Node.new(key) : node.right = Node.new(key)
+      when 1
+        insert(key, node.left.nil? ? node.right : node.left)
+      when 2
+        insert(key, node.data > key ? node.left : node.right)
       end
     end
 
@@ -144,13 +144,14 @@ class Node
     end
 
     # level_order method: recursion
-    def level_order(discovered = [tree], visited = [])
-      return nil unless discovered.length > 0
-      current = discovered.shift
+    def level_order(node = tree, visited = [], discovered = [])
+      return nil if node.nil?
+      node = find(node) unless node.is_a? Node
+      current = node
       discovered.push(current.left) unless current.left.nil?
       discovered.push(current.right) unless current.right.nil?
       visited.push(current.data)
-      level_order(discovered, visited)
+      level_order(discovered.shift, visited, discovered)
       visited
     end
 
@@ -179,7 +180,7 @@ class Node
 
   bst.pretty_print
   #bst.delete(8)
-  #bst.insert(22)
+  bst.insert(25)
   bst.pretty_print
 
   #p bst > bst2
@@ -187,4 +188,4 @@ class Node
   #p bst.preOrder
   #p bst.inOrder
   #p bst.postOrder
-  #p bst.level_order
+  p bst.level_order(67)
