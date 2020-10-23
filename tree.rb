@@ -2,40 +2,39 @@ require_relative 'node.rb'
 
 class Tree < Node
   include Comparable
-  attr_accessor :arr, :tree, :root
+  attr_accessor :arr, :root
 
   def initialize(arr)
     @arr = arr.uniq.sort
-    @tree = build_tree
-    @root = tree.data
+    @root = build_tree
   end
 
   # build the tree
   def build_tree(sorted_arr = arr , mid = nil)
     return nil if 0 > sorted_arr.length - 1
     mid = sorted_arr.length / 2
-    node = Node.new(sorted_arr[mid])
-    node.left = build_tree(sorted_arr[0, mid])
-    node.right = build_tree(sorted_arr[mid + 1, sorted_arr.length])
-    node
+    root = Node.new(sorted_arr[mid])
+    root.left = build_tree(sorted_arr[0, mid])
+    root.right = build_tree(sorted_arr[mid + 1, sorted_arr.length])
+    root
   end
 
   def <=>(other)
-    tree.data <=> other.tree.data
+    root.data <=> other.root.data
   end
 
   # find the lowest value of a node
-  def min(root)
-    root = find(root) if !root.is_a? Node
-    return root if root.left.nil? && root.right.nil?
-    min(root.left)
+  def min(key)
+    key = find(key) if !key.is_a? Node
+    return key if key.left.nil? && key.right.nil?
+    min(key.left)
   end
 
   # find the highest value of a node
-  def max(root)
-    root = find(root) if !root.is_a? Node
-    return root if root.right.nil?
-    max(root.right)
+  def max(key)
+    key = find(key) if !key.is_a? Node
+    return key if key.right.nil?
+    max(key.right)
   end
 
   # count the children of the node
@@ -51,7 +50,7 @@ class Tree < Node
   end
 
   # find the parent node of the child node
-  def find_parent(key, node = tree)
+  def find_parent(key, node = root)
     return nil if node.nil?
     key = find(key) if !key.is_a? Node
     if node.left == key || node.right == key
@@ -71,7 +70,7 @@ class Tree < Node
   end
 
   # find key from the tree nodes
-  def find(key, node = tree)
+  def find(key, node = root)
     return nil if node.nil?
     if key == node.data
       return node
@@ -81,7 +80,7 @@ class Tree < Node
   end
 
   # modify tree; delete key as target then use lower nodes as substitutes
-  def delete(key, node = tree)
+  def delete(key)
     tar = find(key)
     case child_count(tar)
     when 2
@@ -106,7 +105,7 @@ class Tree < Node
   end
 
   # insert a new node into the leaf
-  def insert(key, node = tree)
+  def insert(key, node = root)
     return node if node.data == key
     if child_count(node) == 0
       key < node.data ? node.left = Node.new(key) : node.right = Node.new(key)
@@ -116,7 +115,7 @@ class Tree < Node
   end
 
   # return array of ordered values
-  def preOrder(node = tree, arr = [])
+  def preOrder(node = root, arr = [])
     return nil unless node.is_a? Node
     arr << node.data
     preOrder(node.left, arr) if !node.left.nil?
@@ -124,7 +123,7 @@ class Tree < Node
     arr
   end
 
-  def inOrder(node = tree, arr = [])
+  def inOrder(node = root, arr = [])
     return nil unless node.is_a? Node
     inOrder(node.left, arr) if !node.left.nil?
     arr << node.data
@@ -132,7 +131,7 @@ class Tree < Node
     arr
   end
 
-  def postOrder(node = tree, arr = [])
+  def postOrder(node = root, arr = [])
     return nil unless node.is_a? Node
     postOrder(node.left, arr) if !node.left.nil?
     postOrder(node.right, arr) if !node.right.nil?
@@ -141,7 +140,7 @@ class Tree < Node
   end
 
   # level_order method: recursion
-  def level_order(node = tree, visited = [], discovered = [])
+  def level_order(node = root, visited = [], discovered = [])
     return nil if node.nil?
     node = find(node) unless node.is_a? Node
     current = node
@@ -153,7 +152,7 @@ class Tree < Node
   end
 
   ## level order method: iteration
-  #def level_order(discovered = [tree], visited = [])
+  #def level_order(discovered = [root], visited = [])
   #  while discovered.length > 0
   #    current = discovered.shift
   #    discovered.push(current.left) unless current.left.nil?
@@ -177,7 +176,7 @@ class Tree < Node
   # edges between the given key and the main root
   def depth(key, count = 0, child = key)
     count += 1
-    if root == child
+    if root.data == child
       return count - 1
     else
       parent = find_parent(child).data
@@ -185,7 +184,16 @@ class Tree < Node
     end
   end
 
-  def pretty_print(node = tree, prefix = '', is_left = true)
+  def balanced?
+    diff = height(root.left.data) - height(root.right.data)
+    diff.between?(-1,1)
+  end
+
+  def rebalance
+    @root = build_tree(level_order(root).sort)
+  end
+
+  def pretty_print(node = root, prefix = '', is_left = true)
     pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
     puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
     pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
