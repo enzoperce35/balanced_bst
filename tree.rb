@@ -49,6 +49,16 @@ class Tree < Node
     count
   end
 
+  # drives left or right from the root node
+  def left_right(key, node)
+    case child_count(node)
+    when 1
+      node.left.nil? ? node.right : node.left
+    when 2
+      node.data > key ? node.left : node.right
+    end
+  end
+
   # find the parent node of the child node
   def find_parent(key, node = root)
     return nil if node.nil?
@@ -57,15 +67,6 @@ class Tree < Node
       return node
     else
       find_parent(key, left_right(key.data, node))
-    end
-  end
-
-  def left_right(key, node)
-    case child_count(node)
-    when 1
-      node.left.nil? ? node.right : node.left
-    when 2
-      node.data > key ? node.left : node.right
     end
   end
 
