@@ -19,6 +19,7 @@ class Tree < Node
     root
   end
 
+  # compares two different trees
   def <=>(other)
     root.data <=> other.root.data
   end
@@ -82,26 +83,26 @@ class Tree < Node
 
   # modify tree; delete key as target then use lower nodes as substitutes
   def delete(key)
-    tar = find(key)
-    case child_count(tar)
+    key = find(key) unless key.is_a? Node
+    case child_count(key)
     when 2
-      sub = tar.right.data == nil ? max(tar.left) : min(tar.right)
+      sub = key.right.data == nil ? max(key.left) : min(key.right)
     when 1
-      sub = tar.right.nil? ? tar.left : tar.right
+      sub = key.right.nil? ? key.left : key.right
     when 0
       sub = nil
     end
-    modify(tar, sub)
+    modify(key, sub)
   end
 
-  def modify(tar, sub)
+  def modify(key, sub)
     if sub.nil?
-      parent = find_parent(tar)
-      parent.left == tar ? parent.left = sub : parent.right = sub
+      parent = find_parent(key)
+      parent.left == key ? parent.left = sub : parent.right = sub
     else
       temp = sub.data
       delete(sub.data)
-      tar.data = temp
+      key.data = temp
     end
   end
 
@@ -200,3 +201,4 @@ class Tree < Node
     pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
   end
 end
+
